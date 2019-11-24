@@ -1,53 +1,189 @@
-tail = game.createRoom("tail", "꼬리칸.png")
-jail = game.createRoom("jail", "감옥.png")
-
-////////////////////***Classes***////////////////////
-
-function Door(room, name, closedImage, openedImage, connectedTo, width, hight, size) {
-    this.room = room
-    this.name = name
-    this.closedImage = closedImage
-    this.openedImage = openedImage
-    this.connectedTo = connectedTo
-    this.width = width;
-    this.hight = hight;
-    this.size = size;
-    this.obj = room.createObject(name, closedImage)
-}
-this.obj.setWidth(size);
-this.room.locateObject(this.obj, width, hight);
-Door.prototype.onClick = function() {
-    if(this.obj.isClosed()) {
-        this.obj.open()
-    } else if (this.obj.isOpened()) {
-        game.move(this.connectedTo)
-    }
-}
-Door.prototype.onOpen = function() {
-    this.obj.setSprite(this.openedImage)
+Function.prototype.member = function(name, value){
+	this.prototype[name] = value
 }
 
-function Keypad(room, name, image, password, callback) {
-    this.room = room
-    this.name = name
-    this.image = image
-    this.password = password
-    this.callback = callback
+//////// Game Definition
+function Game(){}
+Game.start = function(room, welcome){
+	game.start(room.id)
+	printMessage(welcome)
+}
+Game.end = function(){
+	game.clear()
+}
+Game.move = function(room){
+	game.move(room.id)	
+}
+Game.handItem = function(){
+	return game.getHandItem()
+}
 
-    this.obj = room.createObject(name, image)
-}
-Keypad.prototype.onClick = function() {
-    showKeypad('number', this.password, this.callback)
-}
 
-function DoorLock(room, name, image, password, door, message) {
-    Keypad.call(this.room, name, image, password, function() {
-        printMessage(message)
-        door.unlock()
-    })
+//////// Room Definition
+
+function Room(name, background){
+	this.name = name
+	this.background = background
+	this.id = game.createRoom(name, background)
 }
+Room.member('setRoomLight', function(intensity){
+	this.id.setRoomLight(intensity)
+})
+
+//////// Object Definition
+
+function Object(room, name, image){
+	this.room = room
+	this.name = name
+	this.image = image
+
+	if (room !== undefined){
+		this.id = room.id.createObject(name, image)
+	}
+}
+Object.STATUS = { OPENED: 0, CLOSED: 1, LOCKED: 2 }
+
+Object.member('setSprite', function(image){
+	this.image = image
+	this.id.setSprite(image)
+})
+Object.member('resize', function(width){
+	this.id.setWidth(width)
+})
+Object.member('setDescription', function(description){
+	this.id.setItemDescription(description)
+})
+
+Object.member('getX', function(){
+	return this.id.getX()
+})
+Object.member('getY', function(){
+	return this.id.getY()
+})
+Object.member('locate', function(x, y){
+	this.room.id.locateObject(this.id, x, y)
+})
+Object.member('move', function(x, y){
+	this.id.moveX(x)
+	this.id.moveY(y)
+})
+
+Object.member('show', function(){
+	this.id.show()
+})
+Object.member('hide', function(){
+	this.id.hide()
+})
+Object.member('open', function(){
+	this.id.open()
+})
+Object.member('close', function(){
+	this.id.close()
+})
+Object.member('lock', function(){
+	this.id.lock()
+})
+Object.member('unlock', function(){
+	this.id.unlock()
+})
+Object.member('isOpened', function(){
+	return this.id.isOpened()
+})
+Object.member('isClosed', function(){
+	return this.id.isClosed()
+})
+Object.member('isLocked', function(){
+	return this.id.isLocked()
+})
+Object.member('pick', function(){
+	this.id.pick()
+})
+Object.member('isPicked', function(){
+	return this.id.isPicked()
+})
+
+//////// Door Definition
+
+function Door(room, name, closedImage, openedImage, connectedTo){
+	Object.call(this, room, name, closedImage)
+
+	// Door properties
+	this.closedImage = closedImage
+	this.openedImage = openedImage
+	this.connectedTo = connectedTo
+}
+// inherited from Object
+Door.prototype = new Object()
+
+Door.member('onClick', function(){
+	if (!this.id.isLocked() && this.id.isClosed()){
+		this.id.open()
+	}
+	else if (this.id.isOpened()){
+		if (this.connectedTo !== undefined){
+			Game.move(this.connectedTo)
+		}
+		else {
+			Game.end()
+		}
+	}
+})
+Door.member('onOpen', function(){
+	this.id.setSprite(this.openedImage)
+})
+Door.member('onClose', function(){
+	this.id.setSprite(this.closedImage)
+})
+
+
+//////// Keypad Definition
+
+function Keypad(room, name, image, password, callback){
+	Object.call(this, room, name, image)
+
+	// Keypad properties
+	this.password = password
+	this.callback = callback
+}
+// inherited from Object
+Keypad.prototype = new Object()
+
+Keypad.member('onClick', function(){
+	showKeypad('number', this.password, this.callback)
+})
+
+
+//////// DoorLock Definition
+function DoorLock(room, name, image, password, door, message){
+	Keypad.call(this, room, name, image, password, function(){
+		printMessage(message)
+		door.unlock()
+	})
+}
+// inherited from Object
 DoorLock.prototype = new Keypad()
 
-////////////////////***tail***////////////////////
+/////// Item Definition
 
-////////////////////***jail***////////////////////
+function Item(room, name, image){
+	Object.call(this, room, name, image)
+}
+// inherited from Object
+Item.prototype = new Object()
+
+Item.member('onClick', function(){
+	this.id.pick()
+})
+Item.member('isHanded', function(){
+	return Game.handItem() == this.id
+})
+
+tail = new Room('tail', '꼬리칸.png')		// 변수명과 이름이 일치해야 한다.
+jail = new Room('jail', '감옥.png')		// 변수명과 이름이 일치해야 한다.
+
+//////////tail//////////
+
+
+//////////jail//////////
+
+Game.start(tail, '여긴... 어디지??')
