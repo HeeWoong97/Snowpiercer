@@ -3,6 +3,7 @@ Function.prototype.member = function(name, value){
 }
 
 //////// Game Definition
+
 function Game(){}
 Game.start = function(room, welcome){
 	game.start(room.id)
@@ -135,6 +136,31 @@ Door.member('onClose', function(){
 	this.id.setSprite(this.closedImage)
 })
 
+//////// Drawer Definition
+
+function Drawer(room, name, closedImage, openedImage){
+	Object.call(this, room, name, closedImage)
+
+	// Drawer properties
+	this.closedImage = closedImage
+	this.openedImage = openedImage
+}
+// inherited from Object
+Drawer.prototype = new Object()
+
+Object.member('onClick', function() {
+	if(this.id.isClosed()) {
+		this.id.open()
+	} else if(this.id.isOpened()) {
+		this.id.close()
+	}
+})
+Object.member('onOpen', function() {
+	this.id.setSprite(this.openedImage)
+})
+Object.member('onClose', function() {
+	this.id.setSprite(this.closedImage)
+})
 
 //////// Keypad Definition
 
@@ -154,6 +180,7 @@ Keypad.member('onClick', function(){
 
 
 //////// DoorLock Definition
+
 function DoorLock(room, name, image, password, door, message){
 	Keypad.call(this, room, name, image, password, function(){
 		printMessage(message)
@@ -178,12 +205,65 @@ Item.member('isHanded', function(){
 	return Game.handItem() == this.id
 })
 
+//////////createRoom//////////
 tail = new Room('tail', '꼬리칸.png')		// 변수명과 이름이 일치해야 한다.
 jail = new Room('jail', '감옥.png')		// 변수명과 이름이 일치해야 한다.
 
 //////////tail//////////
+tail.door1 = new Door(tail, 'door1', '꼬리칸_닫힘.png', '꼬리칸_열림.png', jail)
+tail.door1.resize(150)
+tail.door1.locate(180, 440)
 
+tail.bunk1 = new Object(tail, 'bunk1', 'bunk.png')
+tail.bunk1.resize(200)
+tail.bunk1.locate(530, 480)
+
+tail.bunk2 = new Object(tail, 'bunk2', 'bunk.png')
+tail.bunk2.resize(280)
+tail.bunk2.locate(720, 500)
+
+tail.gilliam = new Object(tail, 'gilliam', '길리엄.png')
+tail.gilliam.resize(100)
+tail.gilliam.locate(720, 480)
+tail.gilliam.hide()
+
+tail.bunk2.onClick = function() {
+	tail.gilliam.show()
+}
+
+tail.drum1 = new Item(tail, 'drum1', 'drum1.png')
+tail.drum1.resize(150)
+tail.drum1.locate(700, 612)
+
+tail.drum2 = new Item(tail, 'drum2', 'drum2.png')
+tail.drum2.resize(100)
+tail.drum2.locate(100, 552)
+
+tail.cabinet1 = new Drawer(tail, 'cabinet1', '캐비닛-오른쪽-닫힘.png', '캐비닛-오른쪽-열림.png')
+tail.cabinet1.resize(120)
+tail.cabinet1.locate(900, 500)
+
+tail.cabinet2 = new Drawer(tail, 'cabinet2', '캐비닛-오른쪽-닫힘.png', '캐비닛-오른쪽-열림.png')
+tail.cabinet2.resize(130)
+tail.cabinet2.locate(1000, 510)
+
+tail.cabinet3 = new Drawer(tail, 'cabinet3', '캐비닛-오른쪽-닫힘.png', '캐비닛-오른쪽-열림.png')
+tail.cabinet3.resize(140)
+tail.cabinet3.locate(1100, 520)
+
+tail.knife = new Item(tail, 'knife', '칼.png')
+tail.knife.resize(100)
+tail.knife.locate(960, 500)
+ 
+tail.cart = new Object(tail, 'cart', 'cart.png')
+tail.cart.resize(180)
+tail.cart.locate(350, 490)
+
+tail.protein = new Item(tail, 'protein', '양갱.png')
+tail.protein.resize(110)
+tail.protein.locate(360, 510)
 
 //////////jail//////////
 
-Game.start(tail, '여긴... 어디지??')
+
+Game.start(tail, "여긴... 어디지??")
