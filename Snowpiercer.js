@@ -18,6 +18,9 @@ Game.move = function(room){
 Game.handItem = function(){
 	return game.getHandItem()
 }
+Game.combination = function(combination1, combination2, combination3) {
+	game.makeCombination(combination1, combination2, combination3)
+}
 
 
 //////// Room Definition
@@ -238,6 +241,11 @@ tail.drum1.locate(700, 612)
 tail.drum2 = new Item(tail, 'drum2', 'drum2.png')
 tail.drum2.resize(100)
 tail.drum2.locate(100, 552)
+
+tail.drum3 = new Object(tail, 'drum3', 'drum3.png')
+tail.drum3.hide()
+
+Game.combination(tail.drum1, tail.drum2, tail.drum3)
 
 tail.cabinet1 = new Drawer(tail, 'cabinet1', '캐비닛-오른쪽-닫힘.png', '캐비닛-오른쪽-열림.png')
 tail.cabinet1.resize(120)
